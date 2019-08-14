@@ -15,8 +15,11 @@ class LRUCache
   end
 
   def get(key)
-    debugger
-    unless map[key]
+    if map[key]
+      node = map[key]
+      update_node!(node)
+      return node.val
+    else
       calc!(key)
     end
     map[key].val
@@ -32,9 +35,8 @@ class LRUCache
 
   def calc!(key)
     # suggested helper method; insert an (un-cached) key
-    node = Node.new(key, prc.call(key))
-    update_node!(node)
-    map.set(key, node)
+    store.append(key, prc.call(key))
+    map.set(key, store.last)
     eject! if count > max
   end
 
@@ -51,7 +53,6 @@ class LRUCache
   def eject!
     node = store.first
     map.delete(node.key)
-    node.prev.next = node.next
-    node.next.prev = node.prev
+    node.remove
   end
 end
